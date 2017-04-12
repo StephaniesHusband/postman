@@ -77,10 +77,3 @@ postman.setEnvironmentVariable("clientKey", encrypted.ciphertext.toString(this.C
 
 All other (non Login) test cases will still require the encryption code in the "Pre-request Script" tab, but will not require
 the user credential "Body" payload. Depending upon the API endpoint, it may not require a "Body" payload at all.
-
-<style>
-a[href*='getpostman'] img {
-   float: right;
-   padding-top: 5px;
-}
-</style>
