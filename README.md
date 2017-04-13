@@ -5,27 +5,33 @@ you can click [here](https://www.getpostman.com/api/collections/63b9bfe39b5c3b0b
 import it into your Postman client.
 
 ## crypto-js
-We are using the JavaScript library `crypto-js` to do our AES encryption. Because of the current limitations of Postman to be
-able to pull in external libraries, the first test case in the collection fetches the library and sets it as a Postman
-global variable.
+Is included in the Postman Sandbox as `CryptoJS`.
 
-This test case only has to be run once (or if after blowing away the global variable `module:crypto`). You will need to run
-the variable contents through `eval` before any test case that needs to use it in the "Pre-request Script" tab. For example,
+## SAPostmanJS
+
+I have created a new "plugin" to help abstract the encryption process so that we can create more succinct and resuable test
+cases. Pull in the "plugin" using the Postman global variable 'hack' as the first statement of any test case.
  
 ```js
-eval(postman.getGlobalVariable("module:crypto"));
+eval(postman.getGlobalVariable("module:sapostman-js"));
 
 // ...your script contents...
 ```
+This file can be obtained from my [github site](https://github.com/StephaniesHusband/postman). You can also use the "Fetch
+SAPostmanJS" test case to automatically objtain the "plugin".  You only need to do this once or if you happen to delete your
+global variable "module:sapostman-js". The "plugin" needs to be in a Postman global variable named `module:sapostman-js`.
 
-After calling the `eval` above, you will have access to the `CryptoJS` namespace via `this.CryptoJS`.
+After calling the `eval` above, you will have access to the `SAPostmanJS` namespace via `this.SAPostmanJS`.
 ```js
-var encrypted = this.CryptoJS.AES.encrypt(...);
+var encrypted = this.SAPostmanJS.createTransaction(...);
 ```
 
+The only function in the "plugin" currently is `createTransaction`. It takes several parameters and some can be optional
+based upon what kind of test case you are running. See details below.
+
 ## Login Test Cases
-There are several test cases in the collection. Each "Login" test case is a different API login and has specific **user** and
-**organization** information contained therein.
+You can have several login test cases so that you can login as different users/organizations--each will be specific to that
+user and/or organization.
 
 ### Body
 Each Login test case requires you enter the user credentials in the "Body" tab in JSON format:
@@ -39,41 +45,72 @@ Example of "Body" contents:
 ```
 
 ### Pre-request Script
-Each Login test case also requires you to set up the organization information in the "Pre-request Script" tab:
+Each Login test case also requires you to set up the organizational information in the "Pre-request Script" tab. Using
+`SAPostmanJS` makes this super simple.
 
-Example of "Pre-request Script:
+Example of "Pre-request Script using SAPostmanJS:
 ```js
-// Load up CryptoJS library. Do this at the top of any pre-request script you need CryptoJS in.
-// You must have previously downloaded and set the "module:crypto" variable.
-eval(postman.getGlobalVariable("module:crypto"));
+eval(postman.getGlobalVariable("module:sapostman-js"));
 
-// Create our uri to hit and encode.
-var uri = "/sasec/ECustomerServices/rest/v1/session?_=" + (new Date().getTime());
-
-// Grab and encode the private key
-var privateKey = this.CryptoJS.enc.Utf8.parse("abcd1234abcd1234");
-
-// Set the uri in our address above
-postman.setEnvironmentVariable("uri", uri);
-
-// Encrypt the uri using the private key
-var encrypted = this.CryptoJS.AES.encrypt(uri, privateKey, {
-    iv: this.CryptoJS.enc.Hex.parse("0000000000000000"), // always
-    keySize: 16,
-    mode: this.CryptoJS.mode.CBC,
-    padding: this.CryptoJS.pad.Pkcs7
+this.SAPostmanJS.createTransaction({
+    endpoint:    "session",
+    clientId:    "NEWL1ORG",
+    privateKey:  "12341234abcdabcd"
 });
 
-// Set the SA_SIGNATURE values
-postman.setEnvironmentVariable("clientId", "MNX");
-postman.setEnvironmentVariable("clientKey", encrypted.ciphertext.toString(this.CryptoJS.enc.Base64));
-
 ```
-**NOTE:** `uri` is the path to the External API endpoint you want to test and will be different based upon the test case.
 
-**NOTE:** The `privateKey` and `clientId` will be specific to an organization.
+For Login test cases, you need to pass in the endpoint `session`, and the specific organizational information that you want
+to login into in the variables `clientId` and `privateKey`.  These must match the specific organization that you want to log
+into and the user you specfied in the body needs to be a member of that org and have permission to use the External API.
 
 ## Other Test Cases
 
-All other (non Login) test cases will still require the encryption code in the "Pre-request Script" tab, but will not require
-the user credential "Body" payload. Depending upon the API endpoint, it may not require a "Body" payload at all.
+All other (non Login) test cases can now also use `createTransaction` but they do not have to specify the `clientId` and
+`privateKey` again! This makes it super easy to develop generic test cases that can be run against whatever user/org you just
+logged into.
+
+**An example** test case to pull a list of an org's devices using SAPostmanJS looks like this:
+
+```js
+eval(postman.getGlobalVariable("module:sapostman-js"));
+
+this.SAPostmanJS.createTransaction({
+    endpoint: "device"
+});
+```
+_This is assuming you have previously made a login call and logged into a specific user/org._  You can, however, specify and
+"override" the stored `clientId` and `privateKey` stored by the Login test case by specifying them in your non-login test
+case.
+
+**Another example** test case to pull a specific devices details using SAPostmanJS:
+
+```js
+eval(postman.getGlobalVariable("module:sapostman-js"));
+
+var deviceName = postman.getEnvironmentVariable("deviceName");
+
+this.SAPostmanJS.createTransaction({
+    endpoint: "device/"+deviceName
+});
+```
+
+This test case assumes there is an environment variable named `deviceName` and creates the specifc endpoint.
+
+**_HANDY TIP!_** You can create a post-transactional script in the "Test" tab of your "device list" call that will save off a
+random device name of those returned so that it can be used in subsequent "device details" test cases.
+
+```js
+if (responseBody !== "Request failed.") {
+    
+    var response = JSON.parse(responseBody);
+    
+    if (response.statusCode === "03000") {
+        var randomIndex = _.random(0, response.devicesSummary.length-1);
+        postman.setEnvironmentVariable("deviceName", response.devicesSummary[randomIndex].deviceName);
+    }
+}
+
+// Clean up
+postman.clearEnvironmentVariable("clientKey");
+```
