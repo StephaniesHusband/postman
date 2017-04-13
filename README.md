@@ -18,7 +18,7 @@ eval(postman.getGlobalVariable("module:sapostman-js"));
 // ...your script contents...
 ```
 This file can be obtained from my [github site](https://github.com/StephaniesHusband/postman). You can also use the "Fetch
-SAPostmanJS" test case to automatically objtain the "plugin".  You only need to do this once or if you happen to delete your
+SAPostmanJS" test case to automatically obtain the "plugin". You only need to do this once or if you happen to delete your
 global variable "module:sapostman-js". The "plugin" needs to be in a Postman global variable named `module:sapostman-js`.
 
 After calling the `eval` above, you will have access to the `SAPostmanJS` namespace via `this.SAPostmanJS`.
