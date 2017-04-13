@@ -7,7 +7,7 @@ import it into your Postman client.
 ## crypto-js
 Is included in the Postman Sandbox as `CryptoJS`.
 
-## SAPostmanJS
+## sapostman-js
 
 I have created a new "plugin" to help abstract the encryption process so that we can create more succinct and resuable test
 cases. Pull in the "plugin" using the Postman global variable 'hack' as the first statement of any test case.
@@ -23,7 +23,7 @@ global variable "module:sapostman-js". The "plugin" needs to be in a Postman glo
 
 After calling the `eval` above, you will have access to the `SAPostmanJS` namespace via `this.SAPostmanJS`.
 ```js
-var encrypted = this.SAPostmanJS.createTransaction(...);
+this.SAPostmanJS.createTransaction(...);
 ```
 
 The only function in the "plugin" currently is `createTransaction`. It takes several parameters and some can be optional
