@@ -37,6 +37,9 @@
             }
             else {
                _privateKey = postman.getEnvironmentVariable("privateKey");
+
+               // The privateKey is stored Base64 encoded so we must decode to send to backend.
+               _privateKey = CryptoJS.enc.Base64.parse(_privateKey);
             }
 
             if (_privateKey) {
