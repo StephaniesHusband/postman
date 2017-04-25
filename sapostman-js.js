@@ -44,7 +44,7 @@
 
             if (_privateKey) {
                // Encrypt the uri using the private key
-               _encrypted = CryptoJS.AES.encrypt(uri, CryptoJS.enc.Utf8.parse(_privateKey), {
+               _encrypted = CryptoJS.AES.encrypt(uri, _privateKey, {
                   iv: CryptoJS.enc.Hex.parse("0000000000000000"),
                   keySize: 16,
                   mode: CryptoJS.mode.CBC,
