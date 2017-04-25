@@ -29,17 +29,15 @@
             postman.setEnvironmentVariable("uri", uri);
 
             if (opts.privateKey) {
-               // Grab and encode the private key
-               _privateKey = opts.privateKey;
+               // Grab and encode the private key.  It's privateKey is stored Base64 encoded so we must decode to send to
+               // backend.
+               _privateKey = CryptoJS.enc.Base64.parse(opts.privateKey);
 
                // Save for subsequent calls
                postman.setEnvironmentVariable("privateKey", _privateKey);
             }
             else {
                _privateKey = postman.getEnvironmentVariable("privateKey");
-
-               // The privateKey is stored Base64 encoded so we must decode to send to backend.
-               _privateKey = CryptoJS.enc.Base64.parse(_privateKey);
             }
 
             if (_privateKey) {
