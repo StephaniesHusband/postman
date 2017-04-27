@@ -17,7 +17,7 @@
          createTransaction: function(opts) {
             var _privateKey;
             var _encrypted;
-            var _clientId;
+            var _clientName;
 
             // Create our uri to hit and encode.
             var uri = _.template('/sasec/ECustomerServices/rest/v1/<%=endpoint%>?_=<%=timestamp%>')({
@@ -52,15 +52,15 @@
                });
 
                // Set the SA_SIGNATURE values
-               _clientId = opts.clientId || postman.getEnvironmentVariable("clientId");
+               _clientName = opts.clientName || postman.getEnvironmentVariable("clientName");
 
-               if (_clientId) {
-                  postman.setEnvironmentVariable("clientId", _clientId);
+               if (_clientName) {
+                  postman.setEnvironmentVariable("clientName", _clientName);
 
                   postman.setEnvironmentVariable("clientKey", _encrypted.ciphertext.toString(CryptoJS.enc.Base64));
                }
                else {
-                  throw "No clientId";
+                  throw "No clientName";
                }
             }
             else {
