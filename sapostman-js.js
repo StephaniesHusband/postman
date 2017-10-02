@@ -46,8 +46,9 @@
                // variable.
                _encrypted = CryptoJS.AES.encrypt(uri, CryptoJS.enc.Base64.parse(_privateKey), {
                   iv: CryptoJS.enc.Hex.parse("0000000000000000"),
+                  keySize: 16,
                   mode: CryptoJS.mode.CBC,
-                  padding: CryptoJS.pad.NoPadding
+                  padding: CryptoJS.pad.Pkcs7
                });
 
                // Set the SA_SIGNATURE values
