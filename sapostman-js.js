@@ -65,7 +65,7 @@
                }
 
                if (_clientName) {
-                  postman.setEnvironmentVariable("clientKey", _encrypted.ciphertext.toString(CryptoJS.enc.Base64));
+                  postman.setEnvironmentVariable("encryptedEndpoint", _encrypted.ciphertext.toString(CryptoJS.enc.Base64));
                }
                else {
                   throw "No clientName";
