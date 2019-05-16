@@ -15,7 +15,7 @@
    var SAPostmanJS = SAPostmanJS || (function() {
       return {
          createTransaction: function(opts) {
-            var _privateKey;
+            var _clientKey;
             var _encrypted;
             var _clientName;
 
@@ -29,22 +29,22 @@
             postman.setEnvironmentVariable("uri", uri);
 
             // Did they pass in a private key?
-            if (opts.privateKey) {
+            if (opts.clientKey) {
                // This key should be Base64 encoded
-               _privateKey = opts.privateKey;
+               _clientKey = opts.clientKey;
 
                // Save the encoded private key encoded for subsequent calls
-               postman.setEnvironmentVariable("privateKey", _privateKey);
+               postman.setEnvironmentVariable("clientKey", _clientKey);
             }
             else {
-               // Get the stored encoded privateKey
-               _privateKey = postman.getEnvironmentVariable("privateKey");
+               // Get the stored encoded clientKey
+               _clientKey = postman.getEnvironmentVariable("clientKey");
             }
 
-            if (_privateKey) {
+            if (_clientKey) {
                // We must decode every time on the fly since Postman doesn't like us storing the decoded byte array in
                // variable.
-               _encrypted = CryptoJS.AES.encrypt(uri, CryptoJS.enc.Base64.parse(_privateKey), {
+               _encrypted = CryptoJS.AES.encrypt(uri, CryptoJS.enc.Base64.parse(_clientKey), {
                   iv: CryptoJS.enc.Hex.parse("0000000000000000"),
                   keySize: 16,
                   mode: CryptoJS.mode.CBC,
@@ -52,11 +52,19 @@
                });
 
                // Set the SA_SIGNATURE values
-               _clientName = opts.clientName || postman.getEnvironmentVariable("clientName");
+               if (opts.clientName) {
+                  // Usually only comes in on a login transaction
+                  _clientName = opts.clientName;
+
+                  // Save the clientName for subsequent calls
+                  postman.setEnvironmentVariable("clientName", _clientName);
+               }
+               else {
+                  // Get the stored clientName
+                  _clientName = postman.getEnvironmentVariable("clientName");
+               }
 
                if (_clientName) {
-                  postman.setEnvironmentVariable("clientName", _clientName);
-
                   postman.setEnvironmentVariable("clientKey", _encrypted.ciphertext.toString(CryptoJS.enc.Base64));
                }
                else {
@@ -64,7 +72,7 @@
                }
             }
             else {
-               throw "No privateKey";
+               throw "No clientKey";
             }
          }
       };
