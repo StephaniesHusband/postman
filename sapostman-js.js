@@ -12,30 +12,28 @@
    var SAPostmanJS = SAPostmanJS || (function() {
       return {
          createTransaction: function(opts) {
-            var _clientKey;
-            var _encrypted;
-            var _clientName;
-
-            console.log(opts);
+            var clientKey;
+            var encrypted;
+            var clientName;
 
             var uri = _.template('/sasec/ECustomerServices/rest/v1/<%=endpoint%>?_=<%=timestamp%>')({
                endpoint: opts.endpoint,
                timestamp: (new Date().getTime())
             });
 
-            pm.variables.set("uri", uri);
+            pm.environment.set("uri", uri);
 
             if (opts.clientKey) {
-               _clientKey = opts.clientKey;
+               clientKey = opts.clientKey;
 
-               pm.variables.set("clientKey", _clientKey);
+               pm.environment.set("clientKey", clientKey);
             }
             else {
-               _clientKey = pm.variables.get("clientKey");
+               clientKey = pm.environment.get("clientKey");
             }
 
-            if (_clientKey) {
-               _encrypted = CryptoJS.AES.encrypt(uri, CryptoJS.enc.Base64.parse(_clientKey), {
+            if (clientKey) {
+               encrypted = CryptoJS.AES.encrypt(uri, CryptoJS.enc.Base64.parse(clientKey), {
                   iv: CryptoJS.enc.Hex.parse("0000000000000000"),
                   keySize: 16,
                   mode: CryptoJS.mode.CBC,
@@ -43,23 +41,23 @@
                });
 
                if (opts.clientName) {
-                  _clientName = opts.clientName;
+                  clientName = opts.clientName;
 
-                  pm.variables.set("clientName", _clientName);
+                  pm.environment.set("clientName", clientName);
                }
                else {
-                  _clientName = pm.variables.get("clientName");
+                  clientName = pm.environment.get("clientName");
                }
 
-               if (_clientName) {
-                  pm.variables.set("encryptedEndpoint", _encrypted.ciphertext.toString(CryptoJS.enc.Base64));
+               if (clientName) {
+                  pm.environment.set("encryptedEndpoint", encrypted.ciphertext.toString(CryptoJS.enc.Base64));
                }
                else {
-                  throw "No clientName";
+                  console.log("ERROR: No clientName");
                }
             }
             else {
-               throw "No clientKey";
+               console.log("ERROR: No clientKey");
             }
          }
       };
