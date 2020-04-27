@@ -11,11 +11,12 @@
 }(this, function() {
    var SAPostmanJS = SAPostmanJS || (function() {
       return {
-         // Use this function to create a SenseAware transaction in the appropriate format.  Valid parameters/options:
-         // {
-         //    clientKey: {String} - Base64 encoded unique key assigned to YOUR clientName by the SenseAware team
-         //    clientName: {String} - 
-         // }
+         // Use this function to create a SenseAware transaction in the appropriate format.  Valid parameters:
+         //    opts: {
+         //       endpoint  : {String} - SenseAware endpoint (and just the endpoint [not path]) you want to call
+         //       clientKey : {String} - Base64 encoded unique key assigned to YOUR clientName by the SenseAware team
+         //       clientName: {String} - YOUR unique API clientName (e.g., SCOTTERWIN)
+         //    }
          createTransaction: function(opts) {
             var clientKey;
             var encrypted;
