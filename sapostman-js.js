@@ -45,8 +45,10 @@
 
             // If we have a clientKey, we can proceed...
             if (clientKey) {
+               pm.globals.set("DecodedClientKey", CryptoJS.enc.Base64.parse(clientKey));
+               
                // Encrypt the entire path using the clientKey...
-               encrypted = CryptoJS.AES.encrypt(path, CryptoJS.enc.Base64.parse(clientKey), {
+               encrypted = CryptoJS.AES.encrypt(path, pm.globals.get("DecodedClientKey")), {
                   iv: CryptoJS.enc.Hex.parse("0000000000000000"),
                   keySize: 16,
                   mode: CryptoJS.mode.CBC,
